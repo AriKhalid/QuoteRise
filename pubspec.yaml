@@ -1,0 +1,52 @@
+name: quoterise
+description: "QuoteRise — Daily motivational quotes."
+publish_to: 'none'
+
+version: 1.0.1+1
+
+environment:
+  sdk: ^3.10.3
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  provider: ^6.1.2
+  easy_localization: ^3.0.7
+  shared_preferences: ^2.3.2
+  lottie: ^3.3.2
+  url_launcher: ^6.3.2
+  home_widget: ^0.6.0
+  flutter_local_notifications: ^18.0.0
+  timezone: ^0.9.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/lang/
+    - assets/quotes/
+    - lib/images/
+
+  fonts:
+    - family: Lato
+      fonts:
+        - asset: assets/fonts/Lato-Regular.ttf
+        - asset: assets/fonts/Lato-Bold.ttf
+          weight: 700
+    - family: PlayfairDisplay
+      fonts:
+        - asset: assets/fonts/PlayfairDisplay-Regular.ttf
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-Regular.ttf
+    - family: Raleway
+      fonts:
+        - asset: assets/fonts/Raleway-Regular.ttf
