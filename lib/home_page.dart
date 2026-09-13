@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +49,57 @@ class _HomePageState extends State<HomePage> {
         curve: Curves.easeInOut,
       );
     }
+  }
+
+  // ponytail: Netztest, nur zum manuellen Debuggen -- danach wieder raus.
+  // Stufen: DNS -> TCP -> HTTP, damit man sieht wo es genau hakt.
+  Future<String> _diagnose(String host) async {
+    final zeilen = <String>[];
+
+    try {
+      final sw = Stopwatch()..start();
+      final adressen = await InternetAddress.lookup(host)
+          .timeout(const Duration(seconds: 10));
+      zeilen.add('DNS ok (${sw.elapsedMilliseconds}ms): ${adressen.map((a) => a.address).join(", ")}');
+    } catch (e) {
+      zeilen.add('DNS FEHLER: $e');
+      return zeilen.join('\n');
+    }
+
+    try {
+      final sw = Stopwatch()..start();
+      final socket = await Socket.connect(host, 443, timeout: const Duration(seconds: 10));
+      zeilen.add('TCP ok (${sw.elapsedMilliseconds}ms) via ${socket.address.address}');
+      await socket.close();
+    } catch (e) {
+      zeilen.add('TCP FEHLER: $e');
+      return zeilen.join('\n');
+    }
+
+    try {
+      final client = HttpClient();
+      final request = await client
+          .getUrl(Uri.https(host, '/'))
+          .timeout(const Duration(seconds: 10));
+      final response = await request.close();
+      zeilen.add('HTTP ok: ${response.statusCode}');
+      client.close();
+    } catch (e) {
+      zeilen.add('HTTP FEHLER: $e');
+    }
+
+    return zeilen.join('\n');
+  }
+
+  Future<void> _testInternet() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final ergebnis = await _diagnose('api.voltrairaq.com');
+    debugPrint('[NETZTEST]\n$ergebnis');
+    if (!mounted) return;
+    messenger.showSnackBar(SnackBar(
+      content: Text(ergebnis),
+      duration: const Duration(seconds: 15),
+    ));
   }
 
   @override
@@ -105,6 +158,13 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
           const Spacer(),
+          GestureDetector(
+            onTap: _testInternet,
+            child: const Padding(
+              padding: EdgeInsets.only(right: 16),
+              child: Icon(CupertinoIcons.wifi, size: 24),
+            ),
+          ),
           GestureDetector(
             onTap: () => _onTabTapped(1),
             child: AnimatedRotation(
